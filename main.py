@@ -10,6 +10,9 @@ it might be in HTML format.
 
 import requests
 import bs4
+import shutil
+
+from requests.api import request
 
 
 url = input("Enter your URL")
@@ -22,9 +25,12 @@ bs = bs4.BeautifulSoup(response.content, "html.parser")
 formatted_text = bs.prettify()#.encode('cp1252', errors='replace') # unformatted format changed to formatted form
 print(formatted_text)
 
-with open(filename,'w', encoding='utf-8') as f:
-    print('writting data to the file')
-    f.write(str(formatted_text))
+try:
+    with open(filename,'w', encoding='utf-8') as f:
+        print('writting data to the file')
+        f.write(str(formatted_text))
+except Exception as ex:
+    print(ex)
 
 img_list = bs.findAll('img')
 print('img_list..,',img_list)
@@ -34,6 +40,21 @@ print('No of img tags in website are ',len(img_list))
 print('No of a tags in website are ',len(a_list))
 
 
+j = 0
+for imgTag in img_list:
+    try:
+        print(imgTag)
+        imgLink = imgTag.get('src')
+        print(imgLink)
+        ext = imgLink[imgLink.rindex('.'):]
+        filen = str(j)+ext
+        res = requests.get(imgLink, stream=True)
+
+        with open(filen, "wb") as file:
+            shutil.copyfileobj(res.raw, file)
+    except Exception as ex:
+        print(ex)
+    j+=1
 
 
 
